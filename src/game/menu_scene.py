@@ -8,11 +8,11 @@ from src.engine.service_locator import ServiceLocator
 class MenuScene(Scene):
     
     def do_create(self):
-        create_text(self.ecs_world, "H1-SCORE", 7, 
+        create_text(self.ecs_world, "H1-SCORE", 8, 
                     pygame.Color(255,0,0), pygame.Vector2(112, 5), TextAlignment.CENTER)
         
         create_text(self.ecs_world, "PLAY", 8, 
-                    pygame.Color(253, 201, 6), pygame.Vector2(112, 60), TextAlignment.CENTER)
+                    pygame.Color(253, 201, 6), pygame.Vector2(112, 70), TextAlignment.CENTER)
         
         create_logo(self.ecs_world
             , pygame.Vector2(40, 80),
@@ -20,10 +20,13 @@ class MenuScene(Scene):
             ServiceLocator.images_service.get("assets/img/game_logo.png"))
 
         create_text(self.ecs_world, "PRESS 'Z' TO START GAME", 8, 
-                    pygame.Color(253, 201, 6), pygame.Vector2(112, 110), TextAlignment.CENTER)
+                    pygame.Color(253, 201, 6), pygame.Vector2(112, 120), TextAlignment.CENTER)
         
         create_text(self.ecs_world, "TRY THIS GAME", 8, 
-                    pygame.Color(255, 0, 0), pygame.Vector2(112, 125), TextAlignment.CENTER)
+                    pygame.Color(255, 0, 0), pygame.Vector2(112, 135), TextAlignment.CENTER)
+        
+        create_text(self.ecs_world, "AERO WARP TEAM", 8, 
+                    pygame.Color(255, 255, 255), pygame.Vector2(112, 240), TextAlignment.CENTER)
         
         start_game_action = self.ecs_world.create_entity()
         self.ecs_world.add_component(start_game_action,

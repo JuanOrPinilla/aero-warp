@@ -10,7 +10,7 @@ from src.ecs.components.tags.c_tag_block import CTagBlock
 from src.ecs.components.tags.c_tag_paddle import CTagPaddle
 from src.engine.service_locator import ServiceLocator
 
-def create_paddle(world:esper.World, paddle_cfg:dict, player_start_cfg:dict):
+def create_player(world:esper.World, paddle_cfg:dict, player_start_cfg:dict):
     surf = ServiceLocator.images_service.get(paddle_cfg["image"])
     pos = pygame.Vector2(player_start_cfg["pos"]["x"], player_start_cfg["pos"]["y"])
     vel = pygame.Vector2(0,0)
@@ -57,6 +57,16 @@ def create_game_input(world:esper.World):
     world.add_component(right_action,
                         CInputCommand("RIGHT", 
                                       pygame.K_RIGHT))
+    
+    up_action = world.create_entity()
+    world.add_component(up_action,
+                        CInputCommand("UP", 
+                                      pygame.K_UP))
+    
+    down_action = world.create_entity()
+    world.add_component(down_action,
+                        CInputCommand("DOWN", 
+                                      pygame.K_DOWN))
     
     pause_action = world.create_entity()
     world.add_component(pause_action,

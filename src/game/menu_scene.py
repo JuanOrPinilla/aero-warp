@@ -1,18 +1,29 @@
 import pygame
 
 from src.engine.scenes.scene import Scene
-from src.create.prefab_creator_interface import TextAlignment, create_text
-from src.ecs.components.c_input_command import CInputCommand 
+from src.create.prefab_creator_interface import TextAlignment, create_text, create_logo
+from src.ecs.components.c_input_command import CInputCommand
+from src.engine.service_locator import ServiceLocator 
 
 class MenuScene(Scene):
     
     def do_create(self):
-        create_text(self.ecs_world, "MAIN MENU", 16, 
-                    pygame.Color(50, 255, 50), pygame.Vector2(320, 150), TextAlignment.CENTER)
-        create_text(self.ecs_world, "PRESS Z TO START GAME", 11, 
-                    pygame.Color(255, 255, 0), pygame.Vector2(320, 210), TextAlignment.CENTER)
-        create_text(self.ecs_world, "Arrows to MOVE - P to PAUSE", 8, 
-                    pygame.Color(150, 150, 255), pygame.Vector2(320, 250), TextAlignment.CENTER)
+        create_text(self.ecs_world, "H1-SCORE", 7, 
+                    pygame.Color(255,0,0), pygame.Vector2(112, 5), TextAlignment.CENTER)
+        
+        create_text(self.ecs_world, "PLAY", 8, 
+                    pygame.Color(253, 201, 6), pygame.Vector2(112, 60), TextAlignment.CENTER)
+        
+        create_logo(self.ecs_world
+            , pygame.Vector2(40, 80),
+            pygame.Vector2(0,0),
+            ServiceLocator.images_service.get("assets/img/game_logo.png"))
+
+        create_text(self.ecs_world, "PRESS 'Z' TO START GAME", 8, 
+                    pygame.Color(253, 201, 6), pygame.Vector2(112, 110), TextAlignment.CENTER)
+        
+        create_text(self.ecs_world, "TRY THIS GAME", 8, 
+                    pygame.Color(255, 0, 0), pygame.Vector2(112, 125), TextAlignment.CENTER)
         
         start_game_action = self.ecs_world.create_entity()
         self.ecs_world.add_component(start_game_action,

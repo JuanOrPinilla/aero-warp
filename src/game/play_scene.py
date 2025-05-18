@@ -18,8 +18,15 @@ import src.engine.game_engine
 class PlayScene(Scene):
     def __init__(self, level_path:str, engine:'src.engine.game_engine.GameEngine') -> None:
         super().__init__(engine)
-        self._move_dir = pygame.Vector2(1, 0) 
+        self._move_dir = pygame.Vector2(0, -1) 
         self._move_speed = 100
+        
+        self._dir_keys = {
+            "UP": False,
+            "DOWN": False,
+            "LEFT": False,
+            "RIGHT": False
+        }
         with open(level_path) as level_file:
             self.level_cfg = json.load(level_file)
         with open("assets/cfg/player.json") as player_file:
@@ -68,6 +75,7 @@ class PlayScene(Scene):
 
         if player_entity is None:
             return
+        
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
@@ -76,20 +84,27 @@ class PlayScene(Scene):
         if self._paused:
             return
 
-        if action.phase == CommandPhase.START:
-            if action.name == "LEFT":
-                self._move_dir = pygame.Vector2(-1, 0)
-            elif action.name == "RIGHT":
-                self._move_dir = pygame.Vector2(1, 0)
-            elif action.name == "UP":
-                self._move_dir = pygame.Vector2(0, -1)
-            elif action.name == "DOWN":
-                self._move_dir = pygame.Vector2(0, 1)
+        # Actualiza las teclas presionadas
+        if action.name in self._dir_keys:
+            if action.phase == CommandPhase.START:
+                self._dir_keys[action.name] = True
+            elif action.phase == CommandPhase.END:
+                self._dir_keys[action.name] = False
 
-            # Cambiar animación según la nueva dirección
-            anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
-            anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
-            set_animation(anim, anim_name)
+            # Calcula la dirección combinada
+            dir_x = (-1 if self._dir_keys["LEFT"] else 0) + (1 if self._dir_keys["RIGHT"] else 0)
+            dir_y = (-1 if self._dir_keys["UP"] else 0) + (1 if self._dir_keys["DOWN"] else 0)
+            new_dir = pygame.Vector2(dir_x, dir_y)
+
+            # Solo actualiza si hay dirección válida
+            if new_dir.length_squared() > 0:
+                self._move_dir = new_dir.normalize()
+
+                # Cambiar animación
+                anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
+                anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
+                set_animation(anim, anim_name)
 
         if action.name == "QUIT_TO_MENU" and action.phase == CommandPhase.START:
             self.switch_scene("MENU_SCENE")
+

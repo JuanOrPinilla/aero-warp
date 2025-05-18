@@ -22,11 +22,15 @@ class MenuScene(Scene):
         create_text(self.ecs_world, "PRESS 'Z' TO START GAME", 8, 
                     pygame.Color(253, 201, 6), pygame.Vector2(112, 120), TextAlignment.CENTER)
         
+        create_text(self.ecs_world, "'P' = PAUSE, 'esc' = QUIT", 8, 
+                    pygame.Color(253, 201, 6), pygame.Vector2(112, 135), TextAlignment.CENTER)
+        
+        
         create_text(self.ecs_world, "TRY THIS GAME", 8, 
-                    pygame.Color(255, 0, 0), pygame.Vector2(112, 135), TextAlignment.CENTER)
+                    pygame.Color(255, 0, 0), pygame.Vector2(112, 155), TextAlignment.CENTER)
         
         create_text(self.ecs_world, "AERO WARP TEAM", 8, 
-                    pygame.Color(255, 255, 255), pygame.Vector2(112, 240), TextAlignment.CENTER)
+                    pygame.Color(255, 255, 255), pygame.Vector2(112, 230), TextAlignment.CENTER)
         
         start_game_action = self.ecs_world.create_entity()
         self.ecs_world.add_component(start_game_action,

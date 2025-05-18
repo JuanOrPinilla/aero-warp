@@ -62,8 +62,13 @@ class PlayScene(Scene):
     
     
     def do_update(self, delta_time: float):
+        if self._paused:
+            self._pause_blink_timer += delta_time
+            if self._pause_blink_timer >= self._pause_blink_interval:
+                self.p_txt_s.visible = not self.p_txt_s.visible
+                self._pause_blink_timer = 0.0
+            return
         if not self._paused:
-            # Recalcular dirección a partir de teclas presionadas
             dir_x = (-1 if self._dir_keys["LEFT"] else 0) + (1 if self._dir_keys["RIGHT"] else 0)
             dir_y = (-1 if self._dir_keys["UP"] else 0) + (1 if self._dir_keys["DOWN"] else 0)
             new_dir = pygame.Vector2(dir_x, dir_y)
@@ -71,7 +76,6 @@ class PlayScene(Scene):
             if new_dir.length_squared() > 0:
                 self._move_dir = new_dir.normalize()
 
-                # Cambiar animación según nueva dirección
                 players = self.ecs_world.get_component(CTagPlayer)
                 for ent, _ in players:
                     anim = self.ecs_world.component_for_entity(ent, CAnimation)
@@ -98,12 +102,13 @@ class PlayScene(Scene):
                 if not visible:
                     self._paused_entities.append(ent)
 
+            
     def do_action(self, action: CInputCommand):
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
+            self._set_entities_visibility(not self._paused)
             return
-
         if action.name == "QUIT_TO_MENU" and action.phase == CommandPhase.START:
             self.switch_scene("MENU_SCENE")
             return

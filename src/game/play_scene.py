@@ -34,8 +34,10 @@ class PlayScene(Scene):
         
         self._player_ent = -1
         self._paused = False
-        
 
+        self._pause_blink_timer = 0.0
+        self._pause_blink_interval = 0.2
+        self._paused_entities = []
 
     def do_create(self):
         create_text(self.ecs_world, "Press ESC to go back", 8, 
@@ -45,6 +47,7 @@ class PlayScene(Scene):
         player_ent = create_player(self.ecs_world, 
                                    self.player_cfg, 
                                    self.level_cfg["player_start"])
+        self._player_ent = player_ent
         self._p_v = self.ecs_world.component_for_entity(player_ent, CVelocity)
         self._p_t = self.ecs_world.component_for_entity(player_ent, CTransform)
                 
@@ -58,59 +61,55 @@ class PlayScene(Scene):
         create_game_input(self.ecs_world)
     
     
-            
     def do_update(self, delta_time: float):
-
         if not self._paused:
+            # Recalcular dirección a partir de teclas presionadas
+            dir_x = (-1 if self._dir_keys["LEFT"] else 0) + (1 if self._dir_keys["RIGHT"] else 0)
+            dir_y = (-1 if self._dir_keys["UP"] else 0) + (1 if self._dir_keys["DOWN"] else 0)
+            new_dir = pygame.Vector2(dir_x, dir_y)
+
+            if new_dir.length_squared() > 0:
+                self._move_dir = new_dir.normalize()
+
+                # Cambiar animación según nueva dirección
+                players = self.ecs_world.get_component(CTagPlayer)
+                for ent, _ in players:
+                    anim = self.ecs_world.component_for_entity(ent, CAnimation)
+                    anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
+                    set_animation(anim, anim_name)
+                    break
+
             self._p_v.vel = self._move_dir * self._move_speed
+
             system_screen_player(self.ecs_world, self.screen_rect)
             system_movement(self.ecs_world, delta_time)
             system_animation(self.ecs_world, delta_time)
 
+
     def do_clean(self):
         self._paused = False
 
+    def _set_entities_visibility(self, visible: bool):
+        """Oculta o muestra todos los CSurface excepto el botón de pausa"""
+        self._paused_entities = []
+        for ent, surface in self.ecs_world.get_component(CSurface):
+            if surface is not self.p_txt_s:
+                surface.visible = visible
+                if not visible:
+                    self._paused_entities.append(ent)
 
-    
     def do_action(self, action: CInputCommand):
-        players = self.ecs_world.get_component(CTagPlayer)
-        player_entity = None
-        for ent, tag in players:
-            player_entity = ent
-            break
-
-        if player_entity is None:
-            return
-        
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
             return
-        
-        if self._paused:
+
+        if action.name == "QUIT_TO_MENU" and action.phase == CommandPhase.START:
+            self.switch_scene("MENU_SCENE")
             return
 
-        # Actualiza las teclas presionadas
         if action.name in self._dir_keys:
             if action.phase == CommandPhase.START:
                 self._dir_keys[action.name] = True
             elif action.phase == CommandPhase.END:
                 self._dir_keys[action.name] = False
-
-            # Calcula la dirección combinada
-            dir_x = (-1 if self._dir_keys["LEFT"] else 0) + (1 if self._dir_keys["RIGHT"] else 0)
-            dir_y = (-1 if self._dir_keys["UP"] else 0) + (1 if self._dir_keys["DOWN"] else 0)
-            new_dir = pygame.Vector2(dir_x, dir_y)
-
-            # Solo actualiza si hay dirección válida
-            if new_dir.length_squared() > 0:
-                self._move_dir = new_dir.normalize()
-
-                # Cambiar animación
-                anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
-                anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
-                set_animation(anim, anim_name)
-
-        if action.name == "QUIT_TO_MENU" and action.phase == CommandPhase.START:
-            self.switch_scene("MENU_SCENE")
-

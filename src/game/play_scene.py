@@ -18,7 +18,8 @@ import src.engine.game_engine
 class PlayScene(Scene):
     def __init__(self, level_path:str, engine:'src.engine.game_engine.GameEngine') -> None:
         super().__init__(engine)
-        
+        self._move_dir = pygame.Vector2(1, 0) 
+        self._move_speed = 100
         with open(level_path) as level_file:
             self.level_cfg = json.load(level_file)
         with open("assets/cfg/player.json") as player_file:
@@ -48,26 +49,17 @@ class PlayScene(Scene):
         create_game_input(self.ecs_world)
     
     def do_update(self, delta_time: float):
-
         if not self._paused:
+            self._p_v.vel = self._move_dir * self._move_speed
             system_screen_player(self.ecs_world, self.screen_rect)
             system_movement(self.ecs_world, delta_time)
             system_animation(self.ecs_world, delta_time)
-
 
 
     def do_clean(self):
         self._paused = False
 
     def do_action(self, action: CInputCommand):
-        if self._paused:
-            if action.name == "PAUSE" and action.phase == CommandPhase.START:
-                self._paused = not self._paused
-                self.p_txt_s.visible = self._paused
-                # Reiniciar velocidad para evitar que quede "pegada"
-                self._p_v.vel.x = 0
-                self._p_v.vel.y = 0
-                return
         players = self.ecs_world.get_component(CTagPlayer)
         player_entity = None
         for ent, tag in players:
@@ -76,39 +68,28 @@ class PlayScene(Scene):
 
         if player_entity is None:
             return
+        if action.name == "PAUSE" and action.phase == CommandPhase.START:
+            self._paused = not self._paused
+            self.p_txt_s.visible = self._paused
+            return
+        
+        if self._paused:
+            return
 
-        if action.name == "LEFT":
-            if action.phase == CommandPhase.START:
-                self._p_v.vel.x -= self.player_cfg["input_velocity"]
-            elif action.phase == CommandPhase.END:
-                self._p_v.vel.x += self.player_cfg["input_velocity"]
+        if action.phase == CommandPhase.START:
+            if action.name == "LEFT":
+                self._move_dir = pygame.Vector2(-1, 0)
+            elif action.name == "RIGHT":
+                self._move_dir = pygame.Vector2(1, 0)
+            elif action.name == "UP":
+                self._move_dir = pygame.Vector2(0, -1)
+            elif action.name == "DOWN":
+                self._move_dir = pygame.Vector2(0, 1)
 
-        elif action.name == "RIGHT":
-            if action.phase == CommandPhase.START:
-                self._p_v.vel.x += self.player_cfg["input_velocity"]
-            elif action.phase == CommandPhase.END:
-                self._p_v.vel.x -= self.player_cfg["input_velocity"]
-
-        elif action.name == "UP":
-            if action.phase == CommandPhase.START:
-                self._p_v.vel.y -= self.player_cfg["input_velocity"]
-            elif action.phase == CommandPhase.END:
-                self._p_v.vel.y += self.player_cfg["input_velocity"]
-
-        elif action.name == "DOWN":
-            if action.phase == CommandPhase.START:
-                self._p_v.vel.y += self.player_cfg["input_velocity"]
-            elif action.phase == CommandPhase.END:
-                self._p_v.vel.y -= self.player_cfg["input_velocity"]
-
-        anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
-        anim_name = get_animation_by_angle(self._p_v.vel.x, self._p_v.vel.y)
-        set_animation(anim, anim_name)
+            # Cambiar animación según la nueva dirección
+            anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
+            anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
+            set_animation(anim, anim_name)
 
         if action.name == "QUIT_TO_MENU" and action.phase == CommandPhase.START:
             self.switch_scene("MENU_SCENE")
-
-        if action.name == "PAUSE" and action.phase == CommandPhase.START:
-            self._paused = not self._paused 
-            self.p_txt_s.visible = self._paused  
-

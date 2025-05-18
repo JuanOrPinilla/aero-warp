@@ -3,7 +3,7 @@ import pygame
 
 from src.ecs.components.c_animation import CAnimation, set_animation
 from src.ecs.components.tags.c_tag_player import CTagPlayer
-from src.ecs.systems.s_animation import system_animation
+from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_game import create_player, create_game_input
 from src.create.prefab_creator_interface import TextAlignment, create_text
@@ -59,52 +59,49 @@ class PlayScene(Scene):
         self._paused = False
 
     def do_action(self, action: CInputCommand):
-        players = self.ecs_world.get_component(CTagPlayer)  # retorna iterable (entity, CTagPlayer)
+        players = self.ecs_world.get_component(CTagPlayer)
         player_entity = None
         for ent, tag in players:
             player_entity = ent
-            break  # solo queremos la primera entidad con CTagPlayer
+            break
 
         if player_entity is None:
-            # No hay entidad con ese tag, puedes manejar el error o salir
             return
 
-        anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
         if action.name == "LEFT":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.x -= self.player_cfg["input_velocity"]
-                set_animation(anim, "MOVE_LEFT")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.x += self.player_cfg["input_velocity"]
 
         elif action.name == "RIGHT":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.x += self.player_cfg["input_velocity"]
-                set_animation(anim, "MOVE_RIGHT")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.x -= self.player_cfg["input_velocity"]
 
         elif action.name == "UP":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.y -= self.player_cfg["input_velocity"]
-                set_animation(anim, "MOVE_UP")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.y += self.player_cfg["input_velocity"]
 
         elif action.name == "DOWN":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.y += self.player_cfg["input_velocity"]
-                set_animation(anim, "MOVE_DOWN")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.y -= self.player_cfg["input_velocity"]
+
+        anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
+        anim_name = get_animation_by_angle(self._p_v.vel.x, self._p_v.vel.y)
+        set_animation(anim, anim_name)
 
         if action.name == "QUIT_TO_MENU" and action.phase == CommandPhase.START:
             self.switch_scene("MENU_SCENE")
 
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
-
             create_text(self.ecs_world, "PAUSE", 8, 
-                    pygame.Color(253, 201, 6), pygame.Vector2(112, 120), TextAlignment.CENTER)
-            
+                        pygame.Color(253, 201, 6), pygame.Vector2(112, 120), TextAlignment.CENTER)
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
+

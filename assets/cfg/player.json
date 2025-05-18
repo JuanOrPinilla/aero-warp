@@ -1,4 +1,17 @@
 {
-    "image": "assets/img/player.png",
-    "input_velocity": 200
+  "image": "assets/img/player.png",
+  "animation": {
+    "number_frames": 32,
+    "list": [
+      { "name": "MOVE_UP", "start": 0, "end": 0, "framerate": 10 },
+      { "name": "MOVE_UP_LEFT", "start": 4, "end": 4, "framerate": 10 },
+      { "name": "MOVE_LEFT", "start": 8, "end": 8, "framerate": 10 },
+      { "name": "MOVE_DOWN_LEFT", "start": 12, "end": 12, "framerate": 10 },
+      { "name": "MOVE_DOWN", "start": 16, "end": 16, "framerate": 10 },
+      { "name": "MOVE_DOWN_RIGHT", "start": 20, "end": 20, "framerate": 10 },
+      { "name": "MOVE_RIGHT", "start": 24, "end": 24, "framerate": 10 },
+      { "name": "MOVE_UP_RIGHT", "start": 28, "end": 28, "framerate": 10 }
+    ]
+  },
+  "input_velocity": 200
 }

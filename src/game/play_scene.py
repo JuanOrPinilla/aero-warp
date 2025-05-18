@@ -1,6 +1,9 @@
 import json
 import pygame
 
+from src.ecs.components.c_animation import CAnimation, set_animation
+from src.ecs.components.tags.c_tag_player import CTagPlayer
+from src.ecs.systems.s_animation import system_animation
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_game import create_player, create_game_input
 from src.create.prefab_creator_interface import TextAlignment, create_text
@@ -9,7 +12,6 @@ from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform 
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_movement import system_movement
-from src.ecs.systems.s_screen_ball import system_screen_ball
 from src.ecs.systems.s_screen_player import system_screen_player
 import src.engine.game_engine
 
@@ -19,10 +21,10 @@ class PlayScene(Scene):
         
         with open(level_path) as level_file:
             self.level_cfg = json.load(level_file)
-        with open("assets/cfg/player.json") as paddle_file:
-            self.player_cfg = json.load(paddle_file)
+        with open("assets/cfg/player.json") as player_file:
+            self.player_cfg = json.load(player_file)
         
-        self._paddle_ent = -1
+        self._player_ent = -1
         self._paused = False
 
     def do_create(self):
@@ -47,6 +49,7 @@ class PlayScene(Scene):
     
     def do_update(self, delta_time: float):
         system_screen_player(self.ecs_world, self.screen_rect)
+        system_animation(self.ecs_world, delta_time)
         
         if not self._paused:
             system_movement(self.ecs_world, delta_time)
@@ -56,24 +59,42 @@ class PlayScene(Scene):
         self._paused = False
 
     def do_action(self, action: CInputCommand):
+        players = self.ecs_world.get_component(CTagPlayer)  # retorna iterable (entity, CTagPlayer)
+        player_entity = None
+        for ent, tag in players:
+            player_entity = ent
+            break  # solo queremos la primera entidad con CTagPlayer
+
+        if player_entity is None:
+            # No hay entidad con ese tag, puedes manejar el error o salir
+            return
+
+        anim = self.ecs_world.component_for_entity(player_entity, CAnimation)
         if action.name == "LEFT":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.x -= self.player_cfg["input_velocity"]
+                set_animation(anim, "MOVE_LEFT")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.x += self.player_cfg["input_velocity"]
+
         elif action.name == "RIGHT":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.x += self.player_cfg["input_velocity"]
+                set_animation(anim, "MOVE_RIGHT")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.x -= self.player_cfg["input_velocity"]
+
         elif action.name == "UP":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.y -= self.player_cfg["input_velocity"]
+                set_animation(anim, "MOVE_UP")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.y += self.player_cfg["input_velocity"]
+
         elif action.name == "DOWN":
             if action.phase == CommandPhase.START:
                 self._p_v.vel.y += self.player_cfg["input_velocity"]
+                set_animation(anim, "MOVE_DOWN")
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.y -= self.player_cfg["input_velocity"]
 

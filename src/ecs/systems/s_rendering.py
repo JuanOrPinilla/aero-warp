@@ -11,8 +11,6 @@ def system_rendering(world:esper.World, screen:pygame.Surface):
         if not c_s.visible:
             continue
         
-        # CASO ESPECIAL CUANDO EL TEXTO CAMBIA
-        # SE DEBE VOLVER A CREAR LA SUPERFICIE
         if world.has_component(ent, CChangingText):
             c_txt = world.component_for_entity(ent, CChangingText)
             c_s.surf = c_txt.font.render(c_txt.text, True, c_s.color)

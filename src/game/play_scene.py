@@ -38,27 +38,36 @@ class PlayScene(Scene):
         self._p_v = self.ecs_world.component_for_entity(player_ent, CVelocity)
         self._p_t = self.ecs_world.component_for_entity(player_ent, CTransform)
                 
-        paused_text_ent = create_text(self.ecs_world, "PAUSED", 16, 
-                    pygame.Color(255, 50, 50), pygame.Vector2(320, 180), 
-                    TextAlignment.CENTER)
+        paused_text_ent = create_text(self.ecs_world, "PAUSE", 12, 
+                                 pygame.Color(255, 50, 50), pygame.Vector2(112, 120), 
+                                 TextAlignment.CENTER)
         self.p_txt_s = self.ecs_world.component_for_entity(paused_text_ent, CSurface)
-        self.p_txt_s.visible = self._paused
-
+        self.p_txt_s.visible = False 
         self._paused = False
+
         create_game_input(self.ecs_world)
     
     def do_update(self, delta_time: float):
-        system_screen_player(self.ecs_world, self.screen_rect)
-        system_animation(self.ecs_world, delta_time)
-        
+
         if not self._paused:
+            system_screen_player(self.ecs_world, self.screen_rect)
             system_movement(self.ecs_world, delta_time)
+            system_animation(self.ecs_world, delta_time)
+
 
 
     def do_clean(self):
         self._paused = False
 
     def do_action(self, action: CInputCommand):
+        if self._paused:
+            if action.name == "PAUSE" and action.phase == CommandPhase.START:
+                self._paused = not self._paused
+                self.p_txt_s.visible = self._paused
+                # Reiniciar velocidad para evitar que quede "pegada"
+                self._p_v.vel.x = 0
+                self._p_v.vel.y = 0
+                return
         players = self.ecs_world.get_component(CTagPlayer)
         player_entity = None
         for ent, tag in players:
@@ -100,8 +109,6 @@ class PlayScene(Scene):
             self.switch_scene("MENU_SCENE")
 
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
-            create_text(self.ecs_world, "PAUSE", 8, 
-                        pygame.Color(253, 201, 6), pygame.Vector2(112, 120), TextAlignment.CENTER)
-            self._paused = not self._paused
-            self.p_txt_s.visible = self._paused
+            self._paused = not self._paused 
+            self.p_txt_s.visible = self._paused  
 

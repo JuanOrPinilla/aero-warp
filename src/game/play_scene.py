@@ -34,6 +34,8 @@ class PlayScene(Scene):
         
         self._player_ent = -1
         self._paused = False
+        
+
 
     def do_create(self):
         create_text(self.ecs_world, "Press ESC to go back", 8, 
@@ -55,17 +57,21 @@ class PlayScene(Scene):
 
         create_game_input(self.ecs_world)
     
+    
+            
     def do_update(self, delta_time: float):
+
         if not self._paused:
             self._p_v.vel = self._move_dir * self._move_speed
             system_screen_player(self.ecs_world, self.screen_rect)
             system_movement(self.ecs_world, delta_time)
             system_animation(self.ecs_world, delta_time)
 
-
     def do_clean(self):
         self._paused = False
 
+
+    
     def do_action(self, action: CInputCommand):
         players = self.ecs_world.get_component(CTagPlayer)
         player_entity = None

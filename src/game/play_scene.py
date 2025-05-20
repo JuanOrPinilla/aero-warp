@@ -18,6 +18,14 @@ import src.engine.game_engine
 class PlayScene(Scene):
     def __init__(self, level_path:str, engine:'src.engine.game_engine.GameEngine') -> None:
         super().__init__(engine)
+        
+        with open(level_path) as level_file:
+            self.level_cfg = json.load(level_file)
+        with open("assets/cfg/player.json") as player_file:
+            self.player_cfg = json.load(player_file)
+            
+        color = self.level_cfg["bg_color"]
+        self._bg_color = pygame.Color(color["r"], color["g"], color["b"])
         self._move_dir = pygame.Vector2(0, -1) 
         self._move_speed = 100
         
@@ -27,10 +35,6 @@ class PlayScene(Scene):
             "LEFT": False,
             "RIGHT": False
         }
-        with open(level_path) as level_file:
-            self.level_cfg = json.load(level_file)
-        with open("assets/cfg/player.json") as player_file:
-            self.player_cfg = json.load(player_file)
         
         self._player_ent = -1
         self._paused = False
@@ -56,8 +60,10 @@ class PlayScene(Scene):
                                  TextAlignment.CENTER)
         self.p_txt_s = self.ecs_world.component_for_entity(paused_text_ent, CSurface)
         self.p_txt_s.visible = False 
-        self._paused = False
-
+        self._paused = False    
+        
+        bg = self.level_cfg.get("bg_color")
+        bg_color = pygame.Color(bg["r"], bg["g"], bg["b"])
         create_game_input(self.ecs_world)
     
     
@@ -118,3 +124,6 @@ class PlayScene(Scene):
                 self._dir_keys[action.name] = True
             elif action.phase == CommandPhase.END:
                 self._dir_keys[action.name] = False
+                
+    def get_background_color(self) -> pygame.Color:
+        return self._bg_color

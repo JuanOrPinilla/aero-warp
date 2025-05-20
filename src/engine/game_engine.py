@@ -67,7 +67,7 @@ class GameEngine:
         self._current_scene.simulate(self._delta_time)
 
     def _draw(self):
-        self.screen.fill(self._bg_color)        
+        self.screen.fill(self._current_scene.get_background_color())        
         self._current_scene.do_draw(self.screen)
         pygame.display.flip()
 

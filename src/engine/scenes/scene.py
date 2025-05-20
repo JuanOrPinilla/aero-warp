@@ -38,6 +38,9 @@ class Scene:
     def do_action(self, action:CInputCommand):
         pass
     
+    def get_background_color(self) -> pygame.Color:
+        return pygame.Color(0, 0, 0)
+
     def do_clean(self):
         pass
 

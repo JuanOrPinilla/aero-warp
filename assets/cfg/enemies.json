@@ -1,0 +1,33 @@
+{
+    "Enemy01":{
+        "image":"assets/img/enemy_01.png",
+        "input_velocity": 200,
+        "animation":{
+            "number_frames": 16,
+            "list":[
+                {"name":"MOVE_UP", "start":0, "end":0, "framerate":10},
+                {"name":"MOVE_UP_LEFT", "start":1, "end":1, "framerate":10},
+                {"name":"MOVE_LEFT", "start":2, "end":2, "framerate":10},
+                {"name":"MOVE_DOWN_LEFT", "start":3, "end":3, "framerate":10},
+                {"name":"MOVE_DOWN", "start":4, "end":4, "framerate":10},
+                {"name":"MOVE_DOWN_RIGHT", "start":5, "end":5, "framerate":10},
+                {"name":"MOVE_RIGHT", "start":6, "end":6, "framerate":10},
+                {"name":"MOVE_UP_RIGHT", "start":7, "end":7, "framerate":10}
+            ]
+        }
+    },
+
+    "Enemy02":{
+        "image":"assets/images/enemies/Enemy02.png",
+        "velocity_min": 50,
+        "velocity_max": 75
+    },
+
+    "Enemy03":{
+        "image":"assets/images/enemies/Enemy03.png"
+    },
+
+    "Enemy04":{
+        "image":"assets/images/enemies/Enemy04.png"
+    }
+}

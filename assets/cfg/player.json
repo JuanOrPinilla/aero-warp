@@ -13,5 +13,5 @@
       { "name": "MOVE_UP_RIGHT", "start": 28, "end": 28, "framerate": 10 }
     ]
   },
-  "input_velocity": 200
+  "input_velocity": 100
 }

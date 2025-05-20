@@ -4,10 +4,12 @@ import pygame
 
 from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation, set_animation
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
 from src.engine.scenes.scene import Scene
-from src.create.prefab_creator_game import create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
+from src.create.prefab_creator_game import create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
@@ -30,6 +32,8 @@ class PlayScene(Scene):
             self.enemies_cfg = json.load(enemies_file)
         with open("assets/cfg/window.json", encoding="utf-8") as window_file:
             self.window_cfg = json.load(window_file)
+        with open('assets/cfg/bullet.json','r') as bullet_file:
+            self.bullet_cfg = json.load(bullet_file)
             
         color = self.level_cfg["bg_color"]
         self._bg_color = pygame.Color(color["r"], color["g"], color["b"])
@@ -43,6 +47,9 @@ class PlayScene(Scene):
             "RIGHT": False
         }
         
+        self._shoot_timer = 0.0
+        self._shoot_interval = 0.2 
+
         self._player_ent = -1
         self._paused = False
 
@@ -79,7 +86,11 @@ class PlayScene(Scene):
             ent = create_cloud_small(self.ecs_world, self.level_cfg, self.level_cfg["player_start"])
             self._cloud_ents.append(ent)
         
-        self._cloud_transforms = [self.ecs_world.component_for_entity(e, CTransform) for e in self._cloud_ents]
+        self._cloud_transforms = [
+            self.ecs_world.component_for_entity(e, CTransform)
+            for e in self._cloud_ents
+            if self.ecs_world.has_component(e, CTagCloud)
+            ]
                     
         paused_text_ent = create_text(self.ecs_world, "PAUSE", 12, 
                                  pygame.Color(255, 50, 50), pygame.Vector2(112, 120), 
@@ -119,7 +130,6 @@ class PlayScene(Scene):
                 break
 
         self._p_v.vel = self._move_dir * self._move_speed
-
         delta_pos = -self._p_v.vel * delta_time
 
         # Mover nubes
@@ -134,6 +144,17 @@ class PlayScene(Scene):
 
         # Actualizar animaciones normalmente
         system_animation(self.ecs_world, delta_time)
+        
+                # Lógica de disparo automático
+        self._shoot_timer += delta_time
+        if self._shoot_timer >= self._shoot_interval:
+            self._shoot_timer = 0.0
+            active_bullets = len(self.ecs_world.get_components(CTagBullet))
+            if self._move_dir.length_squared() > 0:
+                create_bullet_square(self.ecs_world, self._player_ent, self.bullet_cfg, self._move_dir)
+        system_movement(self.ecs_world, delta_time)
+
+
 
 
 

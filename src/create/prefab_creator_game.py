@@ -6,7 +6,10 @@ import esper
 from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_player import  CTagPlayer
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.engine.service_locator import ServiceLocator
@@ -33,6 +36,45 @@ def create_player(world: esper.World, player_cfg: dict, player_start_cfg: dict):
     world.add_component(player_ent, CAnimation(player_cfg["animation"]))
     return player_ent
 
+def create_bullet_square(world: esper.World, player_entity: int, bullet_info: dict, direction: pygame.Vector2):
+    p_transform = world.component_for_entity(player_entity, CTransform)
+    player_surface = world.component_for_entity(player_entity, CSurface)
+
+    bullet_surface = ServiceLocator.images_service.get(bullet_info["image"])
+    bullet_size = bullet_surface.get_rect().size
+    player_size = player_surface.area.size
+
+    # Centro del jugador
+    pos = pygame.Vector2(
+        p_transform.pos.x + (player_size[0] / 2) - (bullet_size[0] / 2),
+        p_transform.pos.y + (player_size[1] / 2) - (bullet_size[1] / 2)
+    )
+
+    direction = direction.normalize()
+    
+    offset_straight = 10
+    offset_diagonal = 5
+
+    if abs(direction.x) > 0.5 and abs(direction.y) > 0.5:
+        # Disparo en diagonal
+        pos.x += offset_diagonal if direction.x > 0 else -offset_diagonal
+        pos.y += offset_diagonal if direction.y > 0 else -offset_diagonal
+    elif abs(direction.x) > abs(direction.y):
+        # Movimiento horizontal dominante
+        pos.x += offset_straight if direction.x > 0 else -offset_straight
+    else:
+        # Movimiento vertical dominante
+        pos.y += offset_straight if direction.y > 0 else -offset_straight
+
+    vel = direction * bullet_info["velocity"]
+
+    bullet_entity = create_sprite(world, pos, vel, bullet_surface)
+    world.add_component(bullet_entity, CTagBullet())
+    ServiceLocator.sounds_service.play(bullet_info["sound"])
+    return bullet_entity
+
+
+
 def create_cloud_mediumA(world: esper.World, level_cfg: dict, player_start_cfg: dict):
     surf = ServiceLocator.images_service.get("assets/img/clouds_medium_A.png")
     screen_width = 224 * 8
@@ -44,6 +86,7 @@ def create_cloud_mediumA(world: esper.World, level_cfg: dict, player_start_cfg: 
 
     cloud_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
     world.add_component(cloud_ent, CAnimation(level_cfg["animation"]))
+    world.add_component(cloud_ent, CTagCloud())
     return cloud_ent
 
 def create_cloud_mediumB(world: esper.World, level_cfg: dict, player_start_cfg: dict):
@@ -57,6 +100,7 @@ def create_cloud_mediumB(world: esper.World, level_cfg: dict, player_start_cfg: 
 
     cloud_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
     world.add_component(cloud_ent, CAnimation(level_cfg["animation"]))
+    world.add_component(cloud_ent, CTagCloud())
     return cloud_ent
 
 def create_cloud_small(world: esper.World, level_cfg: dict, player_start_cfg: dict):
@@ -70,6 +114,7 @@ def create_cloud_small(world: esper.World, level_cfg: dict, player_start_cfg: di
 
     cloud_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
     world.add_component(cloud_ent, CAnimation(level_cfg["animation"]))
+    world.add_component(cloud_ent, CTagCloud())
     return cloud_ent
 
 def create_cloud_large(world: esper.World, level_cfg: dict, player_start_cfg: dict):
@@ -86,6 +131,7 @@ def create_cloud_large(world: esper.World, level_cfg: dict, player_start_cfg: di
     
     cloud_ent = create_sprite(world, pos, None, surf)
     world.add_component(cloud_ent, CAnimation(level_cfg["animation"]))
+    world.add_component(cloud_ent, CTagCloud())
     return cloud_ent
 
 def create_game_input(world:esper.World):

@@ -7,7 +7,7 @@ from src.ecs.components.c_animation import CAnimation, set_animation
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
 from src.engine.scenes.scene import Scene
-from src.create.prefab_creator_game import create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_player, create_game_input
+from src.create.prefab_creator_game import create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
@@ -15,6 +15,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_screen_player import system_screen_player
+from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 import src.engine.game_engine
 
 class PlayScene(Scene):
@@ -25,6 +26,10 @@ class PlayScene(Scene):
             self.level_cfg = json.load(level_file)
         with open("assets/cfg/player.json") as player_file:
             self.player_cfg = json.load(player_file)
+        with open("assets/cfg/enemies.json") as enemies_file:
+            self.enemies_cfg = json.load(enemies_file)
+        with open("assets/cfg/window.json", encoding="utf-8") as window_file:
+            self.window_cfg = json.load(window_file)
             
         color = self.level_cfg["bg_color"]
         self._bg_color = pygame.Color(color["r"], color["g"], color["b"])
@@ -85,6 +90,7 @@ class PlayScene(Scene):
         
         bg = self.level_cfg.get("bg_color")
         bg_color = pygame.Color(bg["r"], bg["g"], bg["b"])
+        create_enemy_spawner(self.ecs_world, self.level_cfg, self.window_cfg)
         create_game_input(self.ecs_world)
     
     
@@ -120,11 +126,16 @@ class PlayScene(Scene):
         for transform in self._cloud_transforms:
             transform.pos += delta_pos
 
+        # Sistema de spawning de enemigos
+        system_enemy_spawner(self.ecs_world, self.enemies_cfg, delta_time)
+
         # Mover otros objetos del mundo 
         system_screen_player(self.ecs_world, self.screen_rect)
 
         # Actualizar animaciones normalmente
         system_animation(self.ecs_world, delta_time)
+
+
 
 
 

@@ -8,6 +8,7 @@ from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_player import  CTagPlayer
+from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.engine.service_locator import ServiceLocator
 
 import random
@@ -115,4 +116,15 @@ def create_game_input(world:esper.World):
     world.add_component(pause_action,
                         CInputCommand("PAUSE", 
                                       pygame.K_p))
-    
+
+def create_enemy(world: esper.World, enemy_cfg: dict,  pos: pygame.Vector2):
+    surf = ServiceLocator.images_service.get(enemy_cfg["image"])    
+    vel = pygame.Vector2(0, 0)
+    enemy_ent = create_sprite(world, pos, vel, surf)
+    world.add_component(enemy_ent, CAnimation(enemy_cfg["animation"]))
+    return enemy_ent
+
+def create_enemy_spawner(world: esper.World, level_data: dict, window_data: dict):
+    spawner_entity = world.create_entity()
+    world.add_component(spawner_entity,
+                        CEnemySpawner(level_data["enemy_spawn_events"], window_data["size"]))

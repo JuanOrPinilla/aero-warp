@@ -34,11 +34,11 @@ def create_player(world: esper.World, player_cfg: dict, player_start_cfg: dict):
 
 def create_cloud_mediumA(world: esper.World, level_cfg: dict, player_start_cfg: dict):
     surf = ServiceLocator.images_service.get("assets/img/clouds_medium_A.png")
-    screen_width = 224 * 4
-    screen_height = 256 * 4
+    screen_width = 224 * 8
+    screen_height = 256 * 8
 
-    x = random.uniform(0, screen_width)
-    y = random.uniform(0, screen_height)
+    x = random.uniform(-screen_width/2, screen_width/2)
+    y = random.uniform(-screen_height/2, screen_height/2)
     pos = pygame.Vector2(x, y)
 
     cloud_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
@@ -47,11 +47,11 @@ def create_cloud_mediumA(world: esper.World, level_cfg: dict, player_start_cfg: 
 
 def create_cloud_mediumB(world: esper.World, level_cfg: dict, player_start_cfg: dict):
     surf = ServiceLocator.images_service.get("assets/img/clouds_medium_B.png")
-    screen_width = 224 * 4
-    screen_height = 256 * 4
+    screen_width = 224 * 10
+    screen_height = 256 * 10
 
-    x = random.uniform(0, screen_width)
-    y = random.uniform(0, screen_height)
+    x = random.uniform(-screen_width/2, screen_width/2)
+    y = random.uniform(-screen_height/2, screen_height/2)
     pos = pygame.Vector2(x, y)
 
     cloud_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
@@ -60,11 +60,11 @@ def create_cloud_mediumB(world: esper.World, level_cfg: dict, player_start_cfg: 
 
 def create_cloud_small(world: esper.World, level_cfg: dict, player_start_cfg: dict):
     surf = ServiceLocator.images_service.get("assets/img/clouds_small.png")
-    screen_width = 224 * 4
-    screen_height = 256 * 4
+    screen_width = 224 * 10
+    screen_height = 256 * 10
 
-    x = random.uniform(0, screen_width)
-    y = random.uniform(0, screen_height)
+    x = random.uniform(-screen_width/2, screen_width/2)
+    y = random.uniform(-screen_height/2, screen_height/2)
     pos = pygame.Vector2(x, y)
 
     cloud_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
@@ -76,14 +76,13 @@ def create_cloud_large(world: esper.World, level_cfg: dict, player_start_cfg: di
     width, height = surf.get_size()
     frame_width = width / 32
 
-    screen_width = 224 * 4
-    screen_height = 256 * 4
+    screen_width = 224 * 10
+    screen_height = 256 * 10
 
-    pos = pygame.Vector2(
-        (screen_width / 2) - (frame_width / 2),
-        screen_height / 2
-    )
-
+    x = random.uniform(-screen_width/2, screen_width/2)
+    y = random.uniform(-screen_height/2, screen_height/2)
+    pos = pygame.Vector2(x, y)
+    
     cloud_ent = create_sprite(world, pos, None, surf)
     world.add_component(cloud_ent, CAnimation(level_cfg["animation"]))
     return cloud_ent

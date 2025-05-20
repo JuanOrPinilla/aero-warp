@@ -58,23 +58,22 @@ class PlayScene(Scene):
         self._p_t = self.ecs_world.component_for_entity(player_ent, CTransform)
         
         self._cloud_ents = []
-        for _ in range(50):  # 5 nubes grandes
+        for _ in range(200):
             ent = create_cloud_large(self.ecs_world, self.level_cfg, self.level_cfg["player_start"])
             self._cloud_ents.append(ent)
             
-        for _ in range(50):  # 5 nubes medianas A
+        for _ in range(150): 
             ent = create_cloud_mediumA(self.ecs_world, self.level_cfg, self.level_cfg["player_start"])
             self._cloud_ents.append(ent)
         
-        for _ in range(50):  # 5 nubes medianas B
+        for _ in range(150):
             ent = create_cloud_mediumB(self.ecs_world, self.level_cfg, self.level_cfg["player_start"])
             self._cloud_ents.append(ent)
         
-        for _ in range(50):  # 5 nubes pequeñas
+        for _ in range(100):
             ent = create_cloud_small(self.ecs_world, self.level_cfg, self.level_cfg["player_start"])
             self._cloud_ents.append(ent)
         
-        # Si quieres guardar los CTransform para cada nube, puedes hacer algo así:
         self._cloud_transforms = [self.ecs_world.component_for_entity(e, CTransform) for e in self._cloud_ents]
                     
         paused_text_ent = create_text(self.ecs_world, "PAUSE", 12, 
@@ -140,30 +139,6 @@ class PlayScene(Scene):
                 surface.visible = visible
                 if not visible:
                     self._paused_entities.append(ent)
-
-    def _generate_clouds_around_player(self):
-        buffer_distance = 300 
-        current_pos = self._p_t.pos
-
-        for _ in range(5):  
-            offset_x = random.uniform(-buffer_distance, buffer_distance)
-            offset_y = random.uniform(-buffer_distance, buffer_distance)
-            new_pos = current_pos + pygame.Vector2(offset_x, offset_y)
-
-            if random.random() < 0.25:
-                ent = create_cloud_large(self.ecs_world, self.level_cfg, {"x": new_pos.x, "y": new_pos.y})
-            elif random.random() < 0.5:
-                ent = create_cloud_mediumA(self.ecs_world, self.level_cfg, {"x": new_pos.x, "y": new_pos.y})
-            elif random.random() < 0.75:
-                ent = create_cloud_mediumB(self.ecs_world, self.level_cfg, {"x": new_pos.x, "y": new_pos.y})
-            else:
-                ent = create_cloud_small(self.ecs_world, self.level_cfg, {"x": new_pos.x, "y": new_pos.y})
-            
-            transform = self.ecs_world.component_for_entity(ent, CTransform)
-            transform.pos = new_pos
-            self._cloud_ents.append(ent)
-            self._cloud_transforms.append(transform)
-
             
     def do_action(self, action: CInputCommand):
         if action.name == "PAUSE" and action.phase == CommandPhase.START:

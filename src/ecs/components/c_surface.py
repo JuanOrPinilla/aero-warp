@@ -9,11 +9,12 @@ class CSurface:
         self.visible = True
 
     @classmethod
-    def from_surface(cls, surface:pygame.Surface):
-        c_surf = cls(pygame.Vector2(0,0), pygame.Color(255,255,255))
+    def from_surface(cls, surface: pygame.Surface, frame_rect: pygame.Rect | None = None):
+        c_surf = cls(pygame.Vector2(0, 0), pygame.Color(255, 255, 255))
         c_surf.surf = surface
-        c_surf.area = surface.get_rect()
+        c_surf.area = frame_rect if frame_rect else surface.get_rect()
         return c_surf
+
     
     @classmethod
     def from_text(cls, text:str, font:pygame.font.Font, color:pygame.color):

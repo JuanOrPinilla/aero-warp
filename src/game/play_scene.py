@@ -3,14 +3,17 @@ import random
 import pygame
 
 from src.create.prefab_creator import create_sprite
-from src.ecs.components.c_animation import CAnimation, set_animation
+from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
-from src.ecs.components.tags.c_tag_interface import CTagInterface
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
+from src.ecs.systems.s_collisions import system_bullet_collision
 from src.ecs.systems.s_enemy_animation import system_enemy_animation
+from src.ecs.systems.s_enemy_shoot import system_enemy_shoot
+from src.ecs.systems.s_explosion_state import system_explosion_state
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_game import create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
@@ -40,6 +43,8 @@ class PlayScene(Scene):
             self.window_cfg = json.load(window_file)
         with open('assets/cfg/bullet.json','r') as bullet_file:
             self.bullet_cfg = json.load(bullet_file)
+        with open('assets/cfg/explosion.json','r') as explosion_file:
+            self.explosion_cfg = json.load(explosion_file)
             
         color = self.level_cfg["bg_color"]
         self._bg_color = pygame.Color(color["r"], color["g"], color["b"])
@@ -62,17 +67,15 @@ class PlayScene(Scene):
         self._pause_blink_timer = 0.0
         self._pause_blink_interval = 0.2
         self._paused_entities = []
+        self.ecs_world.contador = 0
 
     def do_create(self):
         create_text(self.ecs_world, "Press ESC to go back", 8, 
                     pygame.Color(50, 255, 50), pygame.Vector2(320, 20), 
                     TextAlignment.CENTER)
         
-        create_text(self.ecs_world, "PLAYER 1", 8, 
-                    pygame.Color(3,53,0), pygame.Vector2(110, 115), TextAlignment.CENTER, 2)
-        
-        create_text(self.ecs_world, "A.D. 1999", 8, 
-                    pygame.Color(3,53,0), pygame.Vector2(110, 150), TextAlignment.CENTER, 2)
+        create_text(self.ecs_world, "PLAYER 1 \n AD. 1999", 8, 
+                    pygame.Color(255,0,0), pygame.Vector2(112, 5), TextAlignment.CENTER)
         
         player_ent = create_player(self.ecs_world, 
                                    self.player_cfg, 
@@ -138,7 +141,6 @@ class PlayScene(Scene):
             for ent, _ in players:
                 anim = self.ecs_world.component_for_entity(ent, CAnimation)
                 anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
-                set_animation(anim, anim_name)
                 break
 
         self._p_v.vel = self._move_dir * self._move_speed
@@ -150,7 +152,8 @@ class PlayScene(Scene):
 
         # Sistema de spawning de enemigos
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, delta_time)
-
+        system_bullet_collision(self.ecs_world, self.explosion_cfg)
+        system_explosion_state(self.ecs_world, delta_time)
         # Mover otros objetos del mundo 
         system_screen_player(self.ecs_world, self.screen_rect)
 
@@ -161,8 +164,21 @@ class PlayScene(Scene):
         system_enemy_animation(self.ecs_world, delta_time)
         
         # Mover enemigos con el movimiento del jugador
-        enemies = self.ecs_world.get_component(CTagEnemy)  # o la etiqueta que uses para enemigos
+        enemies = self.ecs_world.get_component(CTagEnemy)
         for ent, _ in enemies:
+            if self.ecs_world.has_component(ent, CTransform):
+                transform = self.ecs_world.component_for_entity(ent, CTransform)
+                transform.pos += delta_pos
+        
+        bullets = self.ecs_world.get_component(CTagBullet)
+        
+        for ent, _ in bullets:
+            if self.ecs_world.has_component(ent, CTransform):
+                transform = self.ecs_world.component_for_entity(ent, CTransform)
+                transform.pos += delta_pos
+        explosions = self.ecs_world.get_component(CTagExplosion)
+        
+        for ent, _ in explosions:
             if self.ecs_world.has_component(ent, CTransform):
                 transform = self.ecs_world.component_for_entity(ent, CTransform)
                 transform.pos += delta_pos
@@ -177,7 +193,9 @@ class PlayScene(Scene):
         system_movement_bullet(self.ecs_world, delta_time)
         system_movement_enemy(self.ecs_world, delta_time)
         system_enemy_state(self.ecs_world, delta_time)
+        system_enemy_shoot(self.ecs_world, self.bullet_cfg, delta_time)
         system_lifetime(self.ecs_world, delta_time)
+    
 
     def do_clean(self):
         self._paused = False

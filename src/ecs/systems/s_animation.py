@@ -12,9 +12,8 @@ def system_animation(world:esper.World, delta_time:float):
         # Cuando curr_imte <= 0
         if c_a.curr_anim_time <= 0:
             # RESTAURAR EL TIEMPO
-            c_a.curr_anim_time = c_a.animations_list[c_a.curr_anim].framerate
-            # CAMBIO DE FRAME
             c_a.curr_frame += 1
+            c_a.curr_anim_time = c_a.animations_list[c_a.curr_anim].framerate
             # Limitar el frame con sus propiedad de start y end
             if c_a.curr_frame > c_a.animations_list[c_a.curr_anim].end:
                 c_a.curr_frame = c_a.animations_list[c_a.curr_anim].start
@@ -24,18 +23,13 @@ def system_animation(world:esper.World, delta_time:float):
             c_s.area.x = c_s.area.w * c_a.curr_frame
             
 def get_animation_by_angle(vel_x, vel_y):
-    # Si no hay movimiento, animación idle (o algo neutral)
     if vel_x == 0 and vel_y == 0:
         return "IDLE"
 
-    # Calcula el ángulo en grados (0° a la derecha, 90° arriba)
-    angle = math.degrees(math.atan2(-vel_y, vel_x))  # -vel_y porque en muchas pantallas Y crece hacia abajo
+    angle = math.degrees(math.atan2(-vel_y, vel_x)) 
     if angle < 0:
         angle += 360
 
-    # Define rangos para 8 animaciones (cada sector 45°)
-    # Las animaciones definidas por ti están cada 4 frames: 0°, 45°, 90°, 135°, etc.
-    # Aquí uso el centro de cada sector para seleccionar
     directions = [
         ("MOVE_RIGHT", 0),
         ("MOVE_UP_RIGHT", 45),

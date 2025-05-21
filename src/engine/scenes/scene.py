@@ -1,6 +1,8 @@
 import pygame
 import esper
 
+from src.create.prefab_creator import create_square
+from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.systems.s_input import system_input
 from src.ecs.systems.s_rendering import system_rendering
@@ -11,7 +13,28 @@ class Scene:
         self.ecs_world = esper.World()
         self._game_engine:src.engine.game_engine.GameEngine = game_engine
         self.screen_rect = self._game_engine.screen.get_rect()
+        
+        self.overlay_ent = create_square(self.ecs_world, pygame.Vector2(224, 30),
+                           pygame.Color(0, 0, 0), pygame.Vector2(0, 0),
+                           pygame.Vector2(0, 0))
+        
+        self.overlay_ent_2 = create_square(self.ecs_world, pygame.Vector2(224, 30),
+                           pygame.Color(0, 0, 0), pygame.Vector2(0, 230),
+                           pygame.Vector2(0, 0))
 
+        
+        self.ent_text = create_text(self.ecs_world, "H1-SCORE", 8,
+                            pygame.Color(255, 0, 0), pygame.Vector2(112, 5),
+                            TextAlignment.CENTER)
+        
+        self.ent_score = create_text(self.ecs_world, "10000", 8,
+                            pygame.Color(255, 255, 255), pygame.Vector2(112, 15),
+                            TextAlignment.CENTER)
+        
+        self.kill_count = create_text(self.ecs_world, "00", 8,
+                            pygame.Color(255, 255, 255), pygame.Vector2(30, 238),
+                            TextAlignment.CENTER)
+        
     def do_process_events(self, event:pygame.event):
         system_input(self.ecs_world, event, self.do_action)
 
@@ -33,7 +56,7 @@ class Scene:
         pass
 
     def do_draw(self, screen):
-        system_rendering(self.ecs_world, screen)
+        system_rendering(self.ecs_world, screen, self.overlay_ent,self.ent_text,self.ent_score, self.overlay_ent_2, self.kill_count)
 
     def do_action(self, action:CInputCommand):
         pass

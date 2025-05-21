@@ -39,5 +39,25 @@
 
     "Enemy04":{
         "image":"assets/images/enemies/Enemy04.png"
+    },
+
+    "FinalBoss": {
+    "image": "assets/img/enemy_space_05.png",
+    "animation": {
+      "number_frames": 4,
+      "list": [
+        { "name": "IDLE",  "start": 0, "end": 1, "framerate": 5 },
+        { "name": "TAUNT", "start": 2, "end": 4, "framerate": 5 }
+      ]
+    },
+    "max_hits": 20,
+
+    "detection_radius": 300,
+    "follow_speed": 150,
+    "acceleration": 500,
+    "shoot_interval": {
+        "min": 1.0,
+        "max": 2.0
+    }
     }
 }

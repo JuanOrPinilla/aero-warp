@@ -1,0 +1,2 @@
+class CTagBoss:
+    pass

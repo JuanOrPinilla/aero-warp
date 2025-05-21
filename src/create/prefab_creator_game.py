@@ -6,6 +6,7 @@ import esper
 from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_explosion_state import CExplosionState
+from src.ecs.components.c_health import CHealth
 from src.ecs.components.c_owner import COwner
 from src.ecs.components.c_enemy_shooter import CEnemyShooter
 from src.ecs.components.c_enemy_state import CEnemyState
@@ -13,6 +14,7 @@ from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_lifetime import CLifetime
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
+from src.ecs.components.tags.c_tag_boss import CTagBoss
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_explosion import CTagExplosion
@@ -224,3 +226,31 @@ def create_enemy_spawner(world: esper.World, level_data: dict, window_data: dict
     spawner_entity = world.create_entity()
     world.add_component(spawner_entity,
                         CEnemySpawner(level_data["enemy_spawn_events"], window_data["size"]))
+    
+def create_boss(world: esper.World,
+                boss_cfg: dict,
+                window_size: dict) -> int:
+    surf = ServiceLocator.images_service.get(boss_cfg["image"])
+    w, h = surf.get_size()
+
+    win_w, win_h = window_size["w"], window_size["h"]
+    pos = pygame.Vector2((win_w - w) / 2, (win_h - h) / 2)
+
+    boss_ent = create_sprite(world, pos, pygame.Vector2(0, 0), surf)
+
+    world.add_component(boss_ent, CAnimation(boss_cfg["animation"]))
+    world.add_component(boss_ent, CTagBoss())
+    world.add_component(boss_ent, CTagEnemy())
+
+    world.add_component(boss_ent, CHealth(boss_cfg["max_hits"]))
+    world.add_component(boss_ent, CEnemyState(
+         detection_radius=boss_cfg["detection_radius"],
+         follow_speed    =boss_cfg["follow_speed"],
+         acceleration    =boss_cfg["acceleration"],
+     ))
+    world.add_component(boss_ent, CEnemyShooter(
+         min_interval=boss_cfg["shoot_interval"]["min"],
+         max_interval=boss_cfg["shoot_interval"]["max"],))
+     
+
+    return boss_ent

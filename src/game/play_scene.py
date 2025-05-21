@@ -5,6 +5,7 @@ import pygame
 from src.create.prefab_creator import create_sprite, create_square
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_dead import CDead
+from src.ecs.components.tags.c_tag_boss import CTagBoss
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
@@ -17,7 +18,7 @@ from src.ecs.systems.s_enemy_shoot import system_enemy_shoot
 from src.ecs.systems.s_explosion_state import system_explosion_state
 from src.ecs.systems.s_killcount import update_kill_count_text, update_score_text
 from src.engine.scenes.scene import Scene
-from src.create.prefab_creator_game import create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
+from src.create.prefab_creator_game import create_boss, create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
@@ -53,7 +54,7 @@ class PlayScene(Scene):
         self._bg_color = pygame.Color(color["r"], color["g"], color["b"])
         self._move_dir = pygame.Vector2(0, -1) 
         self._move_speed = 100
-        
+        self._boss_spawned = False
         self._dir_keys = {
             "UP": False,
             "DOWN": False,
@@ -77,6 +78,7 @@ class PlayScene(Scene):
         self.ecs_world.__init__()
         self.ecs_world.contador = 0
         self.ecs_world.score   = 0
+        self._boss_spawned = False
         self._dir_keys = {
             "UP": False,
             "DOWN": False,
@@ -190,7 +192,17 @@ class PlayScene(Scene):
         for transform in self._cloud_transforms:
             transform.pos += delta_pos
 
-        system_enemy_spawner(self.ecs_world, self.enemies_cfg, delta_time)
+        if not self._boss_spawned:
+            if self.ecs_world.contador < 5:
+                system_enemy_spawner(self.ecs_world,
+                                    self.enemies_cfg,
+                                    delta_time)
+            else:
+                # llega a 40: aparece el jefe y cortamos normal spawn
+                create_boss(self.ecs_world,
+                            self.enemies_cfg["FinalBoss"],
+                            self.window_cfg["size"])
+                self._boss_spawned = True
         system_bullet_collision(self.ecs_world, self.explosion_cfg)
         system_explosion_state(self.ecs_world, delta_time)
         system_screen_player(self.ecs_world, self.screen_rect)
@@ -199,11 +211,10 @@ class PlayScene(Scene):
 
         system_enemy_animation(self.ecs_world, delta_time)
         
-        enemies = self.ecs_world.get_component(CTagEnemy)
-        for ent, _ in enemies:
-            if self.ecs_world.has_component(ent, CTransform):
-                transform = self.ecs_world.component_for_entity(ent, CTransform)
-                transform.pos += delta_pos
+        for ent, c_tr in self.ecs_world.get_component(CTransform):
+            if (self.ecs_world.has_component(ent, CTagEnemy)
+                or self.ecs_world.has_component(ent, CTagBoss)):
+                c_tr.pos += delta_pos
         
         bullets = self.ecs_world.get_component(CTagBullet)
         

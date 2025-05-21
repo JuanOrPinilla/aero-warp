@@ -152,6 +152,13 @@ class PlayScene(Scene):
         # Actualizar animaciones de enemigos
         system_enemy_animation(self.ecs_world, delta_time)
         
+        # Mover enemigos con el movimiento del jugador
+        enemies = self.ecs_world.get_component(CTagEnemy)  # o la etiqueta que uses para enemigos
+        for ent, _ in enemies:
+            if self.ecs_world.has_component(ent, CTransform):
+                transform = self.ecs_world.component_for_entity(ent, CTransform)
+                transform.pos += delta_pos
+        
                 # Lógica de disparo automático
         self._shoot_timer += delta_time
         if self._shoot_timer >= self._shoot_interval:

@@ -40,6 +40,7 @@ def system_bullet_collision(world: esper.World,
                 world.delete_entity(bullet_ent)
                 ServiceLocator.sounds_service.play(explosion_cfg["sound"])
                 world.contador += 1
-                print(world.contador)
+                world.score += 100
+                
                 create_explosion(world, center, explosion_cfg)
                 break

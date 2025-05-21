@@ -8,6 +8,7 @@ from src.ecs.systems.s_input import system_input
 from src.ecs.systems.s_rendering import system_rendering
 import src.engine.game_engine
 
+
 class Scene:
     def __init__(self, game_engine:'src.engine.game_engine.GameEngine') -> None:
         self.ecs_world = esper.World()
@@ -22,18 +23,7 @@ class Scene:
                            pygame.Color(0, 0, 0), pygame.Vector2(0, 230),
                            pygame.Vector2(0, 0))
 
-        
-        self.ent_text = create_text(self.ecs_world, "H1-SCORE", 8,
-                            pygame.Color(255, 0, 0), pygame.Vector2(112, 5),
-                            TextAlignment.CENTER)
-        
-        self.ent_score = create_text(self.ecs_world, "10000", 8,
-                            pygame.Color(255, 255, 255), pygame.Vector2(112, 15),
-                            TextAlignment.CENTER)
-        
-        self.kill_count = create_text(self.ecs_world, "00", 8,
-                            pygame.Color(255, 255, 255), pygame.Vector2(30, 238),
-                            TextAlignment.CENTER)
+    
         
     def do_process_events(self, event:pygame.event):
         system_input(self.ecs_world, event, self.do_action)
@@ -56,7 +46,7 @@ class Scene:
         pass
 
     def do_draw(self, screen):
-        system_rendering(self.ecs_world, screen, self.overlay_ent,self.ent_text,self.ent_score, self.overlay_ent_2, self.kill_count)
+        system_rendering(self.ecs_world, screen)
 
     def do_action(self, action:CInputCommand):
         pass
@@ -66,6 +56,6 @@ class Scene:
 
     def do_clean(self):
         pass
-
     
+
 

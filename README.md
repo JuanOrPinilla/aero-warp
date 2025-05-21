@@ -23,7 +23,7 @@ Este proyecto consiste en un juego desarrollado y empaquetado para ser jugado de
 
    
 
-6. **Ejecuta el archivo** `game.exe` (el ejecutable) para comenzar a jugar.
+6. **Ejecuta el archivo** `main.exe` (el ejecutable) para comenzar a jugar.
 
 ## Requisitos
 

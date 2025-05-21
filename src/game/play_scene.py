@@ -9,7 +9,10 @@ from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
+from src.ecs.systems.s_collisions import system_bullet_collision
 from src.ecs.systems.s_enemy_animation import system_enemy_animation
+from src.ecs.systems.s_enemy_shoot import system_enemy_shoot
+from src.ecs.systems.s_explosion_state import system_explosion_state
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_game import create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
@@ -39,6 +42,8 @@ class PlayScene(Scene):
             self.window_cfg = json.load(window_file)
         with open('assets/cfg/bullet.json','r') as bullet_file:
             self.bullet_cfg = json.load(bullet_file)
+        with open('assets/cfg/explosion.json','r') as explosion_file:
+            self.explosion_cfg = json.load(explosion_file)
             
         color = self.level_cfg["bg_color"]
         self._bg_color = pygame.Color(color["r"], color["g"], color["b"])
@@ -157,8 +162,14 @@ class PlayScene(Scene):
         system_enemy_animation(self.ecs_world, delta_time)
         
         # Mover enemigos con el movimiento del jugador
-        enemies = self.ecs_world.get_component(CTagEnemy)  # o la etiqueta que uses para enemigos
+        enemies = self.ecs_world.get_component(CTagEnemy)
         for ent, _ in enemies:
+            if self.ecs_world.has_component(ent, CTransform):
+                transform = self.ecs_world.component_for_entity(ent, CTransform)
+                transform.pos += delta_pos
+        
+        bullets = self.ecs_world.get_component(CTagBullet)
+        for ent, _ in bullets:
             if self.ecs_world.has_component(ent, CTransform):
                 transform = self.ecs_world.component_for_entity(ent, CTransform)
                 transform.pos += delta_pos
@@ -173,7 +184,10 @@ class PlayScene(Scene):
         system_movement_bullet(self.ecs_world, delta_time)
         system_movement_enemy(self.ecs_world, delta_time)
         system_enemy_state(self.ecs_world, delta_time)
+        system_enemy_shoot(self.ecs_world, self.bullet_cfg, delta_time)
+        system_bullet_collision(self.ecs_world, self.explosion_cfg)
         system_lifetime(self.ecs_world, delta_time)
+        system_explosion_state(self.ecs_world, delta_time)
 
     def do_clean(self):
         self._paused = False

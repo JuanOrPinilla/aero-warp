@@ -1,0 +1,14 @@
+{
+    "image": "assets/img/explosion_middle_enemies.png",
+    "animations": {
+        "number_frames": 6,
+        "list": [
+            {
+                "name": "EXPLODE",
+                "start": 0,
+                "end": 5,
+                "framerate": 16
+            }
+        ]
+    }
+}

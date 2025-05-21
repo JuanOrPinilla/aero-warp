@@ -5,12 +5,17 @@ import esper
 
 from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation
+from src.ecs.components.c_explosion_state import CExplosionState
+from src.ecs.components.c_owner import COwner
+from src.ecs.components.c_enemy_shooter import CEnemyShooter
 from src.ecs.components.c_enemy_state import CEnemyState
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_lifetime import CLifetime
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
+from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import  CTagPlayer
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
@@ -72,6 +77,7 @@ def create_bullet_square(world: esper.World, player_entity: int, bullet_info: di
 
     bullet_entity = create_sprite(world, pos, vel, bullet_surface)
     world.add_component(bullet_entity, CTagBullet())
+    world.add_component(bullet_entity, COwner(player_entity))
     ServiceLocator.sounds_service.play(bullet_info["sound"])
     return bullet_entity
 
@@ -195,9 +201,24 @@ def create_enemy(world: esper.World, enemy_cfg: dict):
     world.add_component(enemy_ent, CAnimation(enemy_cfg["animation"]))
     world.add_component(enemy_ent, CTagEnemy())
     world.add_component(enemy_ent, CEnemyState(
-                        detection_radius = 60
-                    ))
+        detection_radius=180,
+        follow_speed=140,))
+    world.add_component(enemy_ent, CEnemyShooter(min_interval=1.0,max_interval=3.0,))
+
     return enemy_ent
+
+def create_explosion(world: esper.World,
+                      pos: pygame.Vector2,
+                      explosion_info: dict):
+     explosion_surface = ServiceLocator.images_service.get(explosion_info["image"])
+     vel = pygame.Vector2(0, 0)
+
+     explosion_entity = create_sprite(world, pos, vel, explosion_surface)
+     world.add_component(explosion_entity, CTagExplosion())
+     world.add_component(explosion_entity,
+                         CAnimation(explosion_info["animations"]))
+     world.add_component(explosion_entity, CExplosionState())
+     return explosion_entity
 
 def create_enemy_spawner(world: esper.World, level_data: dict, window_data: dict):
     spawner_entity = world.create_entity()

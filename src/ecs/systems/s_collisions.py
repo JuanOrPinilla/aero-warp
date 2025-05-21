@@ -7,8 +7,8 @@ from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.components.c_owner import COwner
-from src.ecs.components.c_dead import CDead
 from src.create.prefab_creator_game import create_explosion
+from src.engine.service_locator import ServiceLocator
 
 def system_bullet_collision(world: esper.World,
                             explosion_cfg: dict):
@@ -36,17 +36,11 @@ def system_bullet_collision(world: esper.World,
                 continue
             if b_rect.colliderect(e_rect):
                 center = pygame.Vector2(e_rect.center)
-                create_explosion(world, center, explosion_cfg)
                 world.delete_entity(enemy_ent)
                 world.delete_entity(bullet_ent)
+                ServiceLocator.sounds_service.play(explosion_cfg["sound"])
+                world.contador += 1
+                world.score += 100
+                
+                create_explosion(world, center, explosion_cfg)
                 break
-        else:
-            for player_ent, p_rect in players:
-                if owner.owner == player_ent:
-                    continue
-                if b_rect.colliderect(p_rect):
-                    center = pygame.Vector2(p_rect.center)
-                    create_explosion(world, center, explosion_cfg)
-                    world.delete_entity(bullet_ent)
-                    world.add_component(player_ent, CDead())
-                    break

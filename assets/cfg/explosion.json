@@ -1,4 +1,5 @@
-{
+{   
+    "sound": "assets/snd/enemy_die.ogg",
     "image": "assets/img/explosion_middle_enemies.png",
     "animations": {
         "number_frames": 6,
@@ -7,7 +8,7 @@
                 "name": "EXPLODE",
                 "start": 0,
                 "end": 5,
-                "framerate": 16
+                "framerate": 4
             }
         ]
     }

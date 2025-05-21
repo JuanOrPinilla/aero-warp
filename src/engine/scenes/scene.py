@@ -1,17 +1,30 @@
 import pygame
 import esper
 
+from src.create.prefab_creator import create_square
+from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.systems.s_input import system_input
 from src.ecs.systems.s_rendering import system_rendering
 import src.engine.game_engine
+
 
 class Scene:
     def __init__(self, game_engine:'src.engine.game_engine.GameEngine') -> None:
         self.ecs_world = esper.World()
         self._game_engine:src.engine.game_engine.GameEngine = game_engine
         self.screen_rect = self._game_engine.screen.get_rect()
+        
+        self.overlay_ent = create_square(self.ecs_world, pygame.Vector2(224, 30),
+                           pygame.Color(0, 0, 0), pygame.Vector2(0, 0),
+                           pygame.Vector2(0, 0))
+        
+        self.overlay_ent_2 = create_square(self.ecs_world, pygame.Vector2(224, 30),
+                           pygame.Color(0, 0, 0), pygame.Vector2(0, 230),
+                           pygame.Vector2(0, 0))
 
+    
+        
     def do_process_events(self, event:pygame.event):
         system_input(self.ecs_world, event, self.do_action)
 
@@ -43,6 +56,6 @@ class Scene:
 
     def do_clean(self):
         pass
-
     
+
 

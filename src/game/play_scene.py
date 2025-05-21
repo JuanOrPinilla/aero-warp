@@ -2,18 +2,20 @@ import json
 import random
 import pygame
 
-from src.create.prefab_creator import create_sprite
-from src.ecs.components.c_animation import CAnimation, set_animation
+from src.create.prefab_creator import create_sprite, create_square
+from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_dead import CDead
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
 from src.ecs.systems.s_collisions import system_bullet_collision
 from src.ecs.systems.s_enemy_animation import system_enemy_animation
 from src.ecs.systems.s_enemy_shoot import system_enemy_shoot
 from src.ecs.systems.s_explosion_state import system_explosion_state
+from src.ecs.systems.s_killcount import update_kill_count_text, update_score_text
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_game import create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
@@ -28,6 +30,7 @@ from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_enemy_state import system_enemy_state
 from src.ecs.systems.s_lifetime import system_lifetime
 import src.engine.game_engine
+from src.engine.service_locator import ServiceLocator
 
 class PlayScene(Scene):
     def __init__(self, level_path:str, engine:'src.engine.game_engine.GameEngine') -> None:
@@ -67,14 +70,21 @@ class PlayScene(Scene):
         self._pause_blink_timer = 0.0
         self._pause_blink_interval = 0.2
         self._paused_entities = []
+        self.ecs_world.contador = 0
+        self.ecs_world.score = 0
 
     def do_create(self):
         create_text(self.ecs_world, "Press ESC to go back", 8, 
                     pygame.Color(50, 255, 50), pygame.Vector2(320, 20), 
                     TextAlignment.CENTER)
+    
         
-        create_text(self.ecs_world, "PLAYER 1 \n AD. 1999", 8, 
-                    pygame.Color(255,0,0), pygame.Vector2(112, 5), TextAlignment.CENTER)
+        
+        create_text(self.ecs_world, "PLAYER 1", 8, 
+                    pygame.Color(3,53,0), pygame.Vector2(110, 115), TextAlignment.CENTER, 2)
+        
+        create_text(self.ecs_world, "A.D. 1999", 8, 
+                    pygame.Color(3,53,0), pygame.Vector2(110, 150), TextAlignment.CENTER, 2)
         
         player_ent = create_player(self.ecs_world, 
                                    self.player_cfg, 
@@ -117,6 +127,31 @@ class PlayScene(Scene):
         bg_color = pygame.Color(bg["r"], bg["g"], bg["b"])
         create_enemy_spawner(self.ecs_world, self.level_cfg, self.window_cfg)
         create_game_input(self.ecs_world)
+        
+
+        
+        self.overlay_ent = create_square(self.ecs_world, pygame.Vector2(224, 30),
+                           pygame.Color(0, 0, 0), pygame.Vector2(0, 0),
+                           pygame.Vector2(0, 0))
+        
+        self.overlay_ent_2 = create_square(self.ecs_world, pygame.Vector2(224, 30),
+                           pygame.Color(0, 0, 0), pygame.Vector2(0, 230),
+                           pygame.Vector2(0, 0))
+
+
+        self.kill_count = create_text(self.ecs_world, "00", 8,
+                            pygame.Color(255, 255, 255), pygame.Vector2(30, 238),
+                            TextAlignment.CENTER)
+        
+        self.ent_text = create_text(self.ecs_world, "H1-SCORE", 8,
+                            pygame.Color(255, 0, 0), pygame.Vector2(112, 5),
+                            TextAlignment.CENTER)
+        
+        self.ent_score = create_text(self.ecs_world, "00000", 8,
+                            pygame.Color(255, 255, 255), pygame.Vector2(112, 15),
+                            TextAlignment.CENTER)
+        
+        
     
     
     def do_update(self, delta_time: float):
@@ -127,7 +162,6 @@ class PlayScene(Scene):
                 self._pause_blink_timer = 0.0
             return
 
-        # Capturar la dirección del movimiento según input
         dir_x = (-1 if self._dir_keys["LEFT"] else 0) + (1 if self._dir_keys["RIGHT"] else 0)
         dir_y = (-1 if self._dir_keys["UP"] else 0) + (1 if self._dir_keys["DOWN"] else 0)
         new_dir = pygame.Vector2(dir_x, dir_y)
@@ -135,34 +169,27 @@ class PlayScene(Scene):
         if new_dir.length_squared() > 0:
             self._move_dir = new_dir.normalize()
 
-            # Actualizar animación del jugador según dirección
             players = self.ecs_world.get_component(CTagPlayer)
             for ent, _ in players:
                 anim = self.ecs_world.component_for_entity(ent, CAnimation)
                 anim_name = get_animation_by_angle(self._move_dir.x, self._move_dir.y)
-                set_animation(anim, anim_name)
                 break
 
         self._p_v.vel = self._move_dir * self._move_speed
         delta_pos = -self._p_v.vel * delta_time
 
-        # Mover nubes
         for transform in self._cloud_transforms:
             transform.pos += delta_pos
 
-        # Sistema de spawning de enemigos
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, delta_time)
-
-        # Mover otros objetos del mundo 
+        system_bullet_collision(self.ecs_world, self.explosion_cfg)
+        system_explosion_state(self.ecs_world, delta_time)
         system_screen_player(self.ecs_world, self.screen_rect)
 
-        # Actualizar animaciones normalmente
         system_animation(self.ecs_world, delta_time)
 
-        # Actualizar animaciones de enemigos
         system_enemy_animation(self.ecs_world, delta_time)
         
-        # Mover enemigos con el movimiento del jugador
         enemies = self.ecs_world.get_component(CTagEnemy)
         for ent, _ in enemies:
             if self.ecs_world.has_component(ent, CTransform):
@@ -170,12 +197,18 @@ class PlayScene(Scene):
                 transform.pos += delta_pos
         
         bullets = self.ecs_world.get_component(CTagBullet)
+        
         for ent, _ in bullets:
             if self.ecs_world.has_component(ent, CTransform):
                 transform = self.ecs_world.component_for_entity(ent, CTransform)
                 transform.pos += delta_pos
+        explosions = self.ecs_world.get_component(CTagExplosion)
         
-                # Lógica de disparo automático
+        for ent, _ in explosions:
+            if self.ecs_world.has_component(ent, CTransform):
+                transform = self.ecs_world.component_for_entity(ent, CTransform)
+                transform.pos += delta_pos
+        
         self._shoot_timer += delta_time
         if self._shoot_timer >= self._shoot_interval:
             self._shoot_timer = 0.0
@@ -186,12 +219,15 @@ class PlayScene(Scene):
         system_movement_enemy(self.ecs_world, delta_time)
         system_enemy_state(self.ecs_world, delta_time)
         system_enemy_shoot(self.ecs_world, self.bullet_cfg, delta_time)
-        system_bullet_collision(self.ecs_world, self.explosion_cfg)
         system_lifetime(self.ecs_world, delta_time)
-        system_explosion_state(self.ecs_world, delta_time)
+        update_kill_count_text(self)
+        update_score_text(self)
+        
         if self.ecs_world.has_component(self._player_ent, CDead):
             self.switch_scene("GAME_OVER_SCENE")
             return
+
+    
 
     def do_clean(self):
         self._paused = False
@@ -223,3 +259,5 @@ class PlayScene(Scene):
                 
     def get_background_color(self) -> pygame.Color:
         return self._bg_color
+    
+    

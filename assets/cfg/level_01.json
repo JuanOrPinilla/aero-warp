@@ -25,5 +25,6 @@
             "time":2.0,
             "enemy_type": "Enemy02"
         } 
-    ]
+    ],
+    "sound" : "assets/snd/game_start.ogg"
 }

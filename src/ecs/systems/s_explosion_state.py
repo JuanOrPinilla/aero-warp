@@ -1,3 +1,4 @@
+import pygame
 import esper
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_surface import CSurface
@@ -13,7 +14,7 @@ def system_explosion_state(world: esper.World, delta_time: float):
 
 def _do_explode(entity: int, c_s: CSurface, c_a: CAnimation, 
                 c_es: CExplosionState, world: esper.World, delta_time: float):
-    c_a.curr_anim_time -= delta_time
 
+    c_a.curr_anim_time -= delta_time
     if c_a.curr_frame == c_a.animations_list[c_a.curr_anim].end:
-        world.delete_entity(entity)
+            world.delete_entity(entity)

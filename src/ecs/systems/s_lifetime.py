@@ -11,7 +11,4 @@ def system_lifetime(world: esper.World, delta_time: float):
     for ent, (lt, surf) in world.get_components(CLifetime, CSurface):
         lt.remaining -= delta_time
         if lt.remaining <= 0:
-            # Option A: just hide
             surf.visible = False
-            # Option B: delete the entity entirely
-            # world.delete_entity(ent)

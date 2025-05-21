@@ -4,6 +4,7 @@ import pygame
 
 from src.create.prefab_creator import create_sprite, create_square
 from src.ecs.components.c_animation import CAnimation
+from src.ecs.components.c_dead import CDead
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
@@ -221,6 +222,10 @@ class PlayScene(Scene):
         system_lifetime(self.ecs_world, delta_time)
         update_kill_count_text(self)
         update_score_text(self)
+        
+        if self.ecs_world.has_component(self._player_ent, CDead):
+            self.switch_scene("GAME_OVER_SCENE")
+            return
 
     
 

@@ -20,6 +20,10 @@
         {
             "time": 2.0,
             "enemy_type": "Enemy01"
+        },
+        {
+            "time":3.0,
+            "enemy_type": "Enemy02"
         } 
     ]
 }

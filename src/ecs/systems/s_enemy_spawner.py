@@ -10,9 +10,6 @@ def system_enemy_spawner(world: esper.World, enemies_data: dict, delta_time: flo
             if evt._time_until_spawn <= 0:
                 create_enemy(
                     world,
-                    enemies_data[evt.enemy_type],
-                    evt.position,
-                    evt.velocity
+                    enemies_data[evt.enemy_type]
                 )
-                print("deberia spawnear porque soy una neaaaa")
                 evt._time_until_spawn = evt.spawn_interval

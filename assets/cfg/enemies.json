@@ -17,9 +17,20 @@
         },
 
     "Enemy02":{
-        "image":"assets/images/enemies/Enemy02.png",
-        "velocity_min": 50,
-        "velocity_max": 75
+        "image":"assets/img/enemy_02.png",
+        "animation":{
+                "number_frames": 16,
+                "list":[
+                    {"name":"MOVE_UP", "start":0, "end":0, "framerate":10},
+                    {"name":"MOVE_UP_LEFT", "start":2, "end":2, "framerate":10},
+                    {"name":"MOVE_LEFT", "start":4, "end":4, "framerate":10},
+                    {"name":"MOVE_DOWN_LEFT", "start":6, "end":6, "framerate":10},
+                    {"name":"MOVE_DOWN", "start":8, "end":8, "framerate":10},
+                    {"name":"MOVE_DOWN_RIGHT", "start":10, "end":10, "framerate":10},
+                    {"name":"MOVE_RIGHT", "start":12, "end":12, "framerate":10},
+                    {"name":"MOVE_UP_RIGHT", "start":14, "end":14, "framerate":10}
+                ]
+            }
     },
 
     "Enemy03":{

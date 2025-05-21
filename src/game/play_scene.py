@@ -20,6 +20,7 @@ from src.ecs.systems.s_movement_bullet import system_movement_bullet
 from src.ecs.systems.s_movement_enemy import system_movement_enemy
 from src.ecs.systems.s_screen_player import system_screen_player
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_enemy_state import system_enemy_state
 import src.engine.game_engine
 
 class PlayScene(Scene):
@@ -159,6 +160,7 @@ class PlayScene(Scene):
                 create_bullet_square(self.ecs_world, self._player_ent, self.bullet_cfg, self._move_dir)
         system_movement_bullet(self.ecs_world, delta_time)
         system_movement_enemy(self.ecs_world, delta_time)
+        system_enemy_state(self.ecs_world, self._player_ent, delta_time)
 
     def do_clean(self):
         self._paused = False

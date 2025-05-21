@@ -193,7 +193,7 @@ class PlayScene(Scene):
             transform.pos += delta_pos
 
         if not self._boss_spawned:
-            if self.ecs_world.contador < 5:
+            if self.ecs_world.contador < 2:
                 system_enemy_spawner(self.ecs_world,
                                     self.enemies_cfg,
                                     delta_time)
@@ -243,6 +243,10 @@ class PlayScene(Scene):
         update_kill_count_text(self)
         update_score_text(self)
         
+        if self._boss_spawned and len(self.ecs_world.get_component(CTagBoss)) == 0:
+            self.switch_scene("WIN_SCENE")
+            return
+    
         if self.ecs_world.has_component(self._player_ent, CDead):
             self.switch_scene("GAME_OVER_SCENE")
             return

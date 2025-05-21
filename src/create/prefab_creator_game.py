@@ -203,3 +203,4 @@ def create_enemy_spawner(world: esper.World, level_data: dict, window_data: dict
     spawner_entity = world.create_entity()
     world.add_component(spawner_entity,
                         CEnemySpawner(level_data["enemy_spawn_events"], window_data["size"]))
+    ServiceLocator.sounds_service.play(level_data["sound"])

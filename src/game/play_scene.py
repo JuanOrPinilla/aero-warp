@@ -8,6 +8,7 @@ from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
+from src.ecs.components.tags.c_tag_interface import CTagInterface
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
 from src.ecs.systems.s_enemy_animation import system_enemy_animation
 from src.engine.scenes.scene import Scene
@@ -67,8 +68,11 @@ class PlayScene(Scene):
                     pygame.Color(50, 255, 50), pygame.Vector2(320, 20), 
                     TextAlignment.CENTER)
         
-        create_text(self.ecs_world, "PLAYER 1 \n AD. 1999", 8, 
-                    pygame.Color(255,0,0), pygame.Vector2(112, 5), TextAlignment.CENTER)
+        create_text(self.ecs_world, "PLAYER 1", 8, 
+                    pygame.Color(3,53,0), pygame.Vector2(110, 115), TextAlignment.CENTER, 2)
+        
+        create_text(self.ecs_world, "A.D. 1999", 8, 
+                    pygame.Color(3,53,0), pygame.Vector2(110, 150), TextAlignment.CENTER, 2)
         
         player_ent = create_player(self.ecs_world, 
                                    self.player_cfg, 

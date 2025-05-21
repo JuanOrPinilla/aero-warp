@@ -74,6 +74,15 @@ class PlayScene(Scene):
         self.ecs_world.score = 0
 
     def do_create(self):
+        self.ecs_world.__init__()
+        self.ecs_world.contador = 0
+        self.ecs_world.score   = 0
+        self._dir_keys = {
+            "UP": False,
+            "DOWN": False,
+            "LEFT": False,
+           "RIGHT": False,}
+        self._move_dir = pygame.Vector2(0, -1)
         create_text(self.ecs_world, "Press ESC to go back", 8, 
                     pygame.Color(50, 255, 50), pygame.Vector2(320, 20), 
                     TextAlignment.CENTER)

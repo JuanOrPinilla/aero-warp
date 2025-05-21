@@ -18,11 +18,11 @@
     },
     "enemy_spawn_events": [
         {
-            "time": 2.0,
+            "time": 1.0,
             "enemy_type": "Enemy01"
         },
         {
-            "time":3.0,
+            "time":2.0,
             "enemy_type": "Enemy02"
         } 
     ]

@@ -53,7 +53,7 @@ class FollowState(IEnemyState):
         target_vel = direction * c_state.follow_speed
         # accelerate/decelerate toward target_vel
         delta_vel = target_vel - c_vel.vel
-        max_change = 3 * dt
+        max_change = c_state.acceleration * dt
         # limit change magnitude
         if delta_vel.length() > max_change:
             delta_vel = delta_vel.normalize() * max_change

@@ -194,7 +194,7 @@ class PlayScene(Scene):
             transform.pos += delta_pos
 
         if not self._boss_spawned:
-            if self.ecs_world.contador < 3:
+            if self.ecs_world.contador < 40:
                 system_enemy_spawner(self.ecs_world,
                                     self.enemies_cfg,
                                     delta_time)

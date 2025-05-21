@@ -260,3 +260,4 @@ class PlayScene(Scene):
     def get_background_color(self) -> pygame.Color:
         return self._bg_color
     
+    

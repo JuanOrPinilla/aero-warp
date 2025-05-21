@@ -195,8 +195,7 @@ def create_enemy(world: esper.World, enemy_cfg: dict):
     world.add_component(enemy_ent, CAnimation(enemy_cfg["animation"]))
     world.add_component(enemy_ent, CTagEnemy())
     world.add_component(enemy_ent, CEnemyState(
-                        detection_radius = 180,      
-                        follow_speed     = 140,
+                        detection_radius = 60
                     ))
     return enemy_ent
 

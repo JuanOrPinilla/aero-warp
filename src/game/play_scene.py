@@ -6,6 +6,7 @@ from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation, set_animation
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
 from src.ecs.systems.s_enemy_animation import system_enemy_animation
@@ -160,7 +161,7 @@ class PlayScene(Scene):
                 create_bullet_square(self.ecs_world, self._player_ent, self.bullet_cfg, self._move_dir)
         system_movement_bullet(self.ecs_world, delta_time)
         system_movement_enemy(self.ecs_world, delta_time)
-        system_enemy_state(self.ecs_world, self._player_ent, delta_time)
+        system_enemy_state(self.ecs_world, delta_time)
 
     def do_clean(self):
         self._paused = False

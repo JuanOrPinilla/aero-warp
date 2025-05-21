@@ -22,6 +22,7 @@ from src.ecs.systems.s_movement_enemy import system_movement_enemy
 from src.ecs.systems.s_screen_player import system_screen_player
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_enemy_state import system_enemy_state
+from src.ecs.systems.s_lifetime import system_lifetime
 import src.engine.game_engine
 
 class PlayScene(Scene):
@@ -65,6 +66,9 @@ class PlayScene(Scene):
         create_text(self.ecs_world, "Press ESC to go back", 8, 
                     pygame.Color(50, 255, 50), pygame.Vector2(320, 20), 
                     TextAlignment.CENTER)
+        
+        create_text(self.ecs_world, "PLAYER 1 \n AD. 1999", 8, 
+                    pygame.Color(255,0,0), pygame.Vector2(112, 5), TextAlignment.CENTER)
         
         player_ent = create_player(self.ecs_world, 
                                    self.player_cfg, 
@@ -169,6 +173,7 @@ class PlayScene(Scene):
         system_movement_bullet(self.ecs_world, delta_time)
         system_movement_enemy(self.ecs_world, delta_time)
         system_enemy_state(self.ecs_world, delta_time)
+        system_lifetime(self.ecs_world, delta_time)
 
     def do_clean(self):
         self._paused = False

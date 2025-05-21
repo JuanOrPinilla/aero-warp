@@ -13,7 +13,7 @@ class TextAlignment(Enum):
     CENTER = 2
 
 def create_text(world:esper.World, txt:str, size:int, 
-                color:pygame.Color, pos:pygame.Vector2, alignment:TextAlignment) -> int:
+                color:pygame.Color, pos:pygame.Vector2, alignment:TextAlignment, duration: float | None = None) -> int:
     font = ServiceLocator.fonts_service.get("assets/fnt/PressStart2P.ttf", size)
     text_entity = world.create_entity()
 
@@ -29,6 +29,11 @@ def create_text(world:esper.World, txt:str, size:int,
 
     world.add_component(text_entity,
                         CTransform(pos + origin))
+    
+    if duration is not None:
+        from src.ecs.components.c_lifetime import CLifetime
+        world.add_component(text_entity, CLifetime(duration))
+        
     return text_entity
 
 def create_logo(world: esper.World, pos: pygame.Vector2, vel: pygame.Vector2,

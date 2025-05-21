@@ -5,12 +5,14 @@ import esper
 
 from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation
+from src.ecs.components.c_enemy_state import CEnemyState
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_player import  CTagPlayer
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.engine.service_locator import ServiceLocator
 
@@ -163,11 +165,38 @@ def create_game_input(world:esper.World):
                         CInputCommand("PAUSE", 
                                       pygame.K_p))
 
-def create_enemy(world: esper.World, enemy_cfg: dict,  pos: pygame.Vector2):
+def create_enemy(world: esper.World, enemy_cfg: dict):
     surf = ServiceLocator.images_service.get(enemy_cfg["image"])    
-    vel = pygame.Vector2(0, 0)
-    enemy_ent = create_sprite(world, pos, vel, surf)
+
+    screen_width = 224
+    screen_height = 256
+    margin = 50  
+
+    while True:
+        x = random.uniform(-margin, screen_width + margin)
+        y = random.uniform(-margin, screen_height + margin)
+        if x < 0 or x > screen_width or y < 0 or y > screen_height:
+            break
+    position = pygame.Vector2(x, y)
+
+    target_x = random.uniform(0, screen_width)
+    target_y = random.uniform(0, screen_height)
+    direction = pygame.Vector2(target_x - x, target_y - y)
+    if direction.length() != 0:
+        direction = direction.normalize()
+
+    min_speed = -100
+    max_speed = 100
+    speed = random.uniform(min_speed, max_speed)
+
+    velocity = direction * speed
+
+    enemy_ent = create_sprite(world, position, velocity, surf)
     world.add_component(enemy_ent, CAnimation(enemy_cfg["animation"]))
+    world.add_component(enemy_ent, CTagEnemy())
+    world.add_component(enemy_ent, CEnemyState(
+                        detection_radius = 60
+                    ))
     return enemy_ent
 
 def create_enemy_spawner(world: esper.World, level_data: dict, window_data: dict):

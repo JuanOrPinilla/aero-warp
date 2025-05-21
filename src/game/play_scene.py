@@ -8,6 +8,7 @@ from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.systems.s_animation import get_animation_by_angle, system_animation
+from src.ecs.systems.s_enemy_animation import system_enemy_animation
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_game import create_bullet_square, create_cloud_large, create_cloud_mediumA, create_cloud_mediumB, create_cloud_small, create_enemy_spawner, create_player, create_game_input, create_enemy
 from src.create.prefab_creator_interface import TextAlignment, create_text
@@ -15,7 +16,8 @@ from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform 
 from src.ecs.components.c_velocity import CVelocity
-from src.ecs.systems.s_movement import system_movement
+from src.ecs.systems.s_movement_bullet import system_movement_bullet
+from src.ecs.systems.s_movement_enemy import system_movement_enemy
 from src.ecs.systems.s_screen_player import system_screen_player
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 import src.engine.game_engine
@@ -144,6 +146,9 @@ class PlayScene(Scene):
 
         # Actualizar animaciones normalmente
         system_animation(self.ecs_world, delta_time)
+
+        # Actualizar animaciones de enemigos
+        system_enemy_animation(self.ecs_world, delta_time)
         
                 # Lógica de disparo automático
         self._shoot_timer += delta_time
@@ -152,13 +157,8 @@ class PlayScene(Scene):
             active_bullets = len(self.ecs_world.get_components(CTagBullet))
             if self._move_dir.length_squared() > 0:
                 create_bullet_square(self.ecs_world, self._player_ent, self.bullet_cfg, self._move_dir)
-        system_movement(self.ecs_world, delta_time)
-
-
-
-
-
-
+        system_movement_bullet(self.ecs_world, delta_time)
+        system_movement_enemy(self.ecs_world, delta_time)
 
     def do_clean(self):
         self._paused = False

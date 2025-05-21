@@ -11,6 +11,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_player import  CTagPlayer
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.engine.service_locator import ServiceLocator
 
@@ -163,11 +164,13 @@ def create_game_input(world:esper.World):
                         CInputCommand("PAUSE", 
                                       pygame.K_p))
 
-def create_enemy(world: esper.World, enemy_cfg: dict,  pos: pygame.Vector2):
+def create_enemy(world: esper.World, enemy_cfg: dict,  pos: pygame.Vector2, vel: pygame.Vector2):
     surf = ServiceLocator.images_service.get(enemy_cfg["image"])    
-    vel = pygame.Vector2(0, 0)
+
+    # Check de enemigo TODO
     enemy_ent = create_sprite(world, pos, vel, surf)
     world.add_component(enemy_ent, CAnimation(enemy_cfg["animation"]))
+    world.add_component(enemy_ent, CTagEnemy())
     return enemy_ent
 
 def create_enemy_spawner(world: esper.World, level_data: dict, window_data: dict):

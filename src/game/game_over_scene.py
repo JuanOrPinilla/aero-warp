@@ -3,9 +3,11 @@ import pygame
 from src.engine.scenes.scene import Scene
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand
+from src.engine.service_locator import ServiceLocator
 
 class GameOverScene(Scene):
     def do_create(self):
+        ServiceLocator.sounds_service.play("assets\snd\player_die.ogg")
         # Obtener tamaño de pantalla actual
         screen = pygame.display.get_surface()
         screen_w, screen_h = screen.get_size()

@@ -209,6 +209,19 @@ def create_enemy(world: esper.World, enemy_cfg: dict):
 
     return enemy_ent
 
+def create_explosion_boss(world: esper.World,
+                      pos: pygame.Vector2,
+                      explosion_info: dict):
+     explosion_surface = ServiceLocator.images_service.get("assets\img\explosion_bullets_space_05.png")
+     vel = pygame.Vector2(0, 0)
+
+     explosion_entity = create_sprite(world, pos, vel, explosion_surface)
+     world.add_component(explosion_entity, CTagExplosion())
+     world.add_component(explosion_entity,
+                         CAnimation(explosion_info["animations"]))
+     world.add_component(explosion_entity, CExplosionState())
+     return explosion_entity
+ 
 def create_explosion(world: esper.World,
                       pos: pygame.Vector2,
                       explosion_info: dict):

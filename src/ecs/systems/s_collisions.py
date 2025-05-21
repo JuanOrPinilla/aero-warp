@@ -49,6 +49,10 @@ def system_bullet_collision(world: esper.World,
                 continue
             if b_rect.colliderect(boss_rect):
                 hit_boss = True
+                ServiceLocator.sounds_service.play("assets\snd\explosion.ogg")
+                create_explosion(world,
+                                     pygame.Vector2(boss_rect.center),
+                                     explosion_cfg)
                 # descontar vida
                 health.hits_remaining -= 1
                 # siempre borramos la bala

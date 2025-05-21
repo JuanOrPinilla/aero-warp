@@ -75,6 +75,7 @@ class PlayScene(Scene):
         self.ecs_world.score = 0
 
     def do_create(self):
+        ServiceLocator.sounds_service.play("assets\snd\game_start.ogg")
         self.ecs_world.__init__()
         self.ecs_world.contador = 0
         self.ecs_world.score   = 0
@@ -193,7 +194,7 @@ class PlayScene(Scene):
             transform.pos += delta_pos
 
         if not self._boss_spawned:
-            if self.ecs_world.contador < 2:
+            if self.ecs_world.contador < 3:
                 system_enemy_spawner(self.ecs_world,
                                     self.enemies_cfg,
                                     delta_time)
@@ -248,6 +249,7 @@ class PlayScene(Scene):
             return
     
         if self.ecs_world.has_component(self._player_ent, CDead):
+            ServiceLocator.sounds_service.play("assets\snd\game_over.ogg")
             self.switch_scene("GAME_OVER_SCENE")
             return
 
@@ -267,6 +269,7 @@ class PlayScene(Scene):
             
     def do_action(self, action: CInputCommand):
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
+            ServiceLocator.sounds_service.play("assets\snd\game_paused.ogg")
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
             self._set_entities_visibility(not self._paused)

@@ -4,6 +4,7 @@ import pygame
 
 from src.create.prefab_creator import create_sprite
 from src.ecs.components.c_animation import CAnimation, set_animation
+from src.ecs.components.c_dead import CDead
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_cloud import CTagCloud
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
@@ -188,6 +189,9 @@ class PlayScene(Scene):
         system_bullet_collision(self.ecs_world, self.explosion_cfg)
         system_lifetime(self.ecs_world, delta_time)
         system_explosion_state(self.ecs_world, delta_time)
+        if self.ecs_world.has_component(self._player_ent, CDead):
+            self.switch_scene("GAME_OVER_SCENE")
+            return
 
     def do_clean(self):
         self._paused = False
